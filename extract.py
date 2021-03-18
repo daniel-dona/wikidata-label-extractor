@@ -3,19 +3,25 @@ import re
 
 buf = ""
 n = 0
+n2 = 0
 
 def process_sentences(data):
 	
 	global n
+	global n2
 	
-	item = {'id': '', 'en': '', 'es': '', 'fr': '', 'it': ''}
+	item = {'id': '', 'en': [], 'es': [], 'fr': [], 'it': []}
 
 	
 	lines = data.replace('\t', '').split("\n")[1:-1]
 
 		
 	x1 = re.match("(.*) rdfs:label \"(.*)\"@(.*) ;", lines[0])
+	#x1b = re.match("(.*) skos:altLabel \"(.*)\"@(.*) ;", lines[0])
 	x2 = re.match("(.*) a wikibase:Item ;", lines[0])
+	
+	#if x1b != None:
+	#	print(x1b.group(1), file=sys.stderr, flush=True)
 
 	if x1 != None or x2 != None:
 			
@@ -24,16 +30,16 @@ def process_sentences(data):
 			item['id'] = x1.group(1)
 			
 			if x1.group(3) == "es":
-				item['es'] = x1.group(2)
+				item['es'].append(x1.group(2))
 			
 			if x1.group(3) == "en":
-				item['en'] = x1.group(2)
+				item['en'].append(x1.group(2))
 					
 			if  x1.group(3) == "fr":
-				item['fr'] = x1.group(2)
+				item['fr'].append(x1.group(2))
 				
 			if  x1.group(3) == "it":
-				item['it'] = x1.group(2)
+				item['it'].append(x1.group(2))
 				
 		else:
 			
@@ -45,26 +51,50 @@ def process_sentences(data):
 			#print(l)
 			
 			z = re.match("rdfs:label \"(.*)\"@(.*) ;", l)
+			zb = re.match("skos:altLabel \"(.*)\"@(.*) ;", l)
+			
+			if zb != None and zb.group(2) == "es":
+				item['es'].append(zb.group(1))
+				
+			if zb != None and zb.group(2) == "en":
+				item['en'].append(zb.group(1))
+				
+			if zb != None and zb.group(2) == "it":
+				item['it'].append(zb.group(1))
+				
+			if zb != None and zb.group(2) == "fr":
+				item['fr'].append(zb.group(1))
 		
 			if z != None and z.group(2) == "es":
-				item['es'] = z.group(1)
+				item['es'].append(z.group(1))
 	
 			if z != None and z.group(2) == "en":
-				item['en'] = z.group(1)
+				item['en'].append(z.group(1))
 				
 			if z != None and z.group(2) == "fr":
-				item['fr'] = z.group(1)
+				item['fr'].append(z.group(1))
 				
 			if z != None and z.group(2) == "it":
-				item['it'] = z.group(1)
+				item['it'].append(z.group(1))
 				
 	if item['id'] != '':
-		print(item['id'], item['en'], item['es'], item['it'], item['fr'], sep="\t")
 		
-		if n%100 == 0:		
-			print("Extracted:",n,"terms",file=sys.stderr, flush=True, end="\r")
+		if len(item['en']) == 0:
+			item['en'].append("")
+		if len(item['es']) == 0:
+			item['es'].append("")
+		if len(item['it']) == 0:
+			item['it'].append("")
+		if len(item['fr']) == 0:
+			item['fr'].append("")
 		
-		n+=1
+		print(item['id'], "\x1f".join(item['en']),"\x1f".join(item['es']),"\x1f".join(item['it']),"\x1f".join(item['fr']), sep="\t")
+		
+		if n%1000 == 0:		
+			print("\nExtracted: ",n," items with ", n2, " terms",file=sys.stderr, flush=True, end="\n")
+
+		n += 1
+		n2 += len(item['en'])+len(item['es'])+len(item['it'])+len(item['fr'])
 
 
 
