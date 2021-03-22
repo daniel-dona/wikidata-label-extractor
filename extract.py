@@ -1,9 +1,12 @@
 import sys
 import re
+import json
 
 buf = ""
 n = 0
 n2 = 0
+
+output_file = open(sys.argv[2], 'w+')
 
 def process_sentences(data):
 	
@@ -79,28 +82,35 @@ def process_sentences(data):
 				
 	if item['id'] != '':
 		
-		if len(item['en']) == 0:
-			item['en'].append("")
-		if len(item['es']) == 0:
-			item['es'].append("")
-		if len(item['it']) == 0:
-			item['it'].append("")
-		if len(item['fr']) == 0:
-			item['fr'].append("")
-		
-		print(item['id'], "\x1f".join(item['en']),"\x1f".join(item['es']),"\x1f".join(item['it']),"\x1f".join(item['fr']), sep="\t")
-		
-		if n%1000 == 0:		
-			print("\nExtracted: ",n," items with ", n2, " terms",file=sys.stderr, flush=True, end="\n")
 
-		n += 1
-		n2 += len(item['en'])+len(item['es'])+len(item['it'])+len(item['fr'])
+			
+		if  len(item['en'])+len(item['es'])+len(item['it'])+len(item['fr']) > 1:
+			
+			## CSV
+			'''if len(item['en']) == 0:
+				item['en'].append("")
+			if len(item['es']) == 0:
+				item['es'].append("")
+			if len(item['it']) == 0:
+				item['it'].append("")
+			if len(item['fr']) == 0:
+				item['fr'].append("")'''
+			
+			#print(item['id'], "\x1f".join(item['en']),"\x1f".join(item['es']),"\x1f".join(item['it']),"\x1f".join(item['fr']), sep="\t", file=output_file, flush=True)
+			
+			## JSON
+			print(json.dumps(item), file=output_file, flush=True)
+			
+			
+			n += 1
+			n2 += len(item['en'])+len(item['es'])+len(item['it'])+len(item['fr'])
+			
 
 
 
 #f = open("/data/Datos/latest-all.ttl")
 
-for line in sys.stdin:
+for line in open(sys.argv[1]):
 	
 	if line.startswith("@prefix"):
 		continue
